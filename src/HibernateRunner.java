@@ -6,6 +6,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+/*
+* Nasty Paths Tried
+* Try to modify an entry in the table and not using a commit: Passes TransactionException: nested transaction not supported.
+* Try to query a user that isn't in the database: it actually ran without errors, it just returned nothing
+* try to put merge in different places: SessionException: Session is closed!
+* try to connect to database that you don't have:SQLGrammarException: Could not open connection, Not a valid database exception
+* do a query for a class type that hasn't been anotated or doesn't exist: if you try to call a class that hasn't been annotated then
+* you can get this exception: AnnotationException: Use of @OneToMany or @ManyToMany targeting an unmapped class
+* had a bad username and password in config, try to use a null: putting null in for username passes a NullPointerException,
+* putting in a username that isn't valid passes a SQLException: Access denied for user 'notAUserName', it also could not open a connection
+* */
+
 public class HibernateRunner {
     private List<User> users;
     private HibernateConfig theHibernateUtility;
@@ -98,6 +110,10 @@ public class HibernateRunner {
          */
         Query singleUserQuery = session.createQuery("select u from User as u where u.uname='lee'");
         User leeUser = (User)singleUserQuery.uniqueResult();
+
+        // Nasty path for querying an entry that doesn't exist
+//        Query queryNothing = session.createQuery("select u from User as u where u.uname='notAName'");
+//        User notAPersonUser = (User)queryNothing.uniqueResult();
         /*
          * change the user name for the Java instance
          */
@@ -111,6 +127,7 @@ public class HibernateRunner {
          * call the transaction commit method.  This tells the database that the changes are ready to be permanently stored.
          */
         transaction.commit();
+//        session.merge(leeUser);
         /*
          * permanently store the changes into the database tables.
          */
